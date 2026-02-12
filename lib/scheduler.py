@@ -9,7 +9,7 @@ import time
 import random
 
 
-class Scheduler(object):
+class Scheduler:
     transient_key_scheduled = 'NEXT_SENTINEL_CHECK_AT'
     random_interval_max = 1800
 

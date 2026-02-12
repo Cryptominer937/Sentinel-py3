@@ -37,11 +37,11 @@ class SwampConfig():
         default_port = 26920 if (network == 'mainnet') else 16920
 
         # use default port for network if not specified in swamp.conf
-        if not ('port' in creds):
-            creds[u'port'] = default_port
+        if 'port' not in creds:
+            creds['port'] = default_port
 
         # convert to an int if taken from swamp.conf
-        creds[u'port'] = int(creds[u'port'])
+        creds['port'] = int(creds['port'])
 
         # return a dictionary with RPC credential key, value pairs
         return creds

@@ -10,7 +10,7 @@ import time
 
 
 # mixin for GovObj composed classes like proposal and superblock, etc.
-class GovernanceClass(object):
+class GovernanceClass:
     only_masternode_can_submit = False
 
     # lazy
@@ -82,7 +82,7 @@ class GovernanceClass(object):
             object_hash = swampd.rpc_command(*self.get_submit_command())
             printdbg("Submitted: [%s]" % object_hash)
         except JSONRPCException as e:
-            print("Unable to submit: %s" % e.message)
+            print("Unable to submit: %s" % e)
 
     def serialise(self):
         import inflection
@@ -90,7 +90,7 @@ class GovernanceClass(object):
         import simplejson
 
         # 'proposal', 'superblock', etc.
-        name = self._meta.name
+        name = self._meta.table_name
         obj_type = inflection.singularize(name)
 
         return binascii.hexlify(simplejson.dumps((obj_type, self.get_dict()), sort_keys=True).encode('utf-8')).decode('utf-8')
@@ -102,8 +102,8 @@ class GovernanceClass(object):
     @classmethod
     def serialisable_fields(self):
         # Python is so not very elegant...
-        pk_column = self._meta.primary_key.db_column
-        fk_columns = [fk.db_column for fk in self._meta.rel.values()]
+        pk_column = self._meta.primary_key.column_name
+        fk_columns = [fk.column_name for fk in self._meta.refs]
         do_not_use = [pk_column]
         do_not_use.extend(fk_columns)
         do_not_use.append('object_hash')

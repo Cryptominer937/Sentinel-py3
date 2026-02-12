@@ -2,7 +2,7 @@
 # "masternodelist full"
 
 
-class Masternode():
+class Masternode:
     def __init__(self, collateral, mnstring):
         (txid, vout_index) = self.parse_collateral_string(collateral)
         self.txid = txid

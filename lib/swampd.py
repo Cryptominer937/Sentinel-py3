@@ -13,7 +13,7 @@ from decimal import Decimal
 import time
 
 
-class SwampDaemon():
+class SwampDaemon:
     def __init__(self, **kwargs):
         host = kwargs.get('host', '127.0.0.1')
         user = kwargs.get('user')
@@ -231,7 +231,7 @@ class SwampDaemon():
             block = self.rpc_command('getblock', bhash)
             epoch = block['time']
         except JSONRPCException as e:
-            if e.message == 'Block height out of range':
+            if str(e) == 'Block height out of range':
                 epoch = self.estimate_block_time(height)
             else:
                 print("error: %s" % e)

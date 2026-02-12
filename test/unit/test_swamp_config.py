@@ -9,7 +9,6 @@ import config
 from swamp_config import SwampConfig
 
 
-@pytest.fixture
 def swamp_conf(**kwargs):
     defaults = {
         'rpcuser': 'swamprpc',

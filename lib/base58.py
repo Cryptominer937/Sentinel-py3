@@ -7,17 +7,17 @@ import hashlib
 
 
 # for compatibility with following code...
-class SHA256(object):
+class SHA256:
     new = hashlib.sha256
 
 
-if str != bytes:
-    # Python 3.x
-    def ord(c):
-        return c
+# Python 3: bytes indexing returns int, so ord() is identity
+def ord(c):
+    return c
 
-    def chr(n):
-        return bytes((n,))
+
+def chr(n):
+    return bytes((n,))
 
 
 __b58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -116,7 +116,7 @@ def get_bcaddress_version(strAddress):
 
 if __name__ == '__main__':
     # Test case (from http://gitorious.org/bitcoin/python-base58.git)
-    assert get_bcaddress_version('15VjRaDX9zpbA8LVnbrCAFzrVzN7ixHNsC') is 0
+    assert get_bcaddress_version('15VjRaDX9zpbA8LVnbrCAFzrVzN7ixHNsC') == 0
     _ohai = 'o hai'.encode('ascii')
     _tmp = b58encode(_ohai)
     assert _tmp == 'DYB3oMS'

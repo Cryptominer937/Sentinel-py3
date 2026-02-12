@@ -257,7 +257,7 @@ def did_we_vote(output):
             err_msg = detail.get('errorMessage')
     except JSONRPCException as e:
         result = 'failed'
-        err_msg = e.message
+        err_msg = str(e)
 
     # success, failed
     printdbg("result  = [%s]" % result)

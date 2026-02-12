@@ -16,10 +16,7 @@ import swampd
 from misc import (printdbg, is_numeric)
 import config
 from bitcoinrpc.authproxy import JSONRPCException
-try:
-    import urllib.parse as urlparse
-except ImportError:
-    import urlparse
+import urllib.parse as urlparse
 
 # our mixin
 from governance_class import GovernanceClass
@@ -70,7 +67,7 @@ class GovernanceObject(BaseModel):
     absolute_yes_count = IntegerField(default=0)
 
     class Meta:
-        db_table = 'governance_objects'
+        table_name = 'governance_objects'
 
     # sync swampd gobject list with our local relational DB backend
     @classmethod
@@ -120,7 +117,14 @@ class GovernanceObject(BaseModel):
 
         obj_type, dikt = objects[0:2:1]
         obj_type = inflection.pluralize(obj_type)
-        subclass = self._meta.reverse_rel[obj_type].model_class
+        # peewee 3.x: use backrefs to find the related model by backref name
+        subclass = None
+        for fk_field, backref_model in self._meta.backrefs.items():
+            if fk_field.backref == obj_type:
+                subclass = fk_field.model
+                break
+        if subclass is None:
+            raise Exception("Unknown governance object type: %s" % obj_type)
 
         # set object_type in govobj table
         gobj_dict['object_type'] = subclass.govobj_type
@@ -255,11 +259,11 @@ class Setting(BaseModel):
     updated_at = DateTimeField(default=datetime.datetime.utcnow())
 
     class Meta:
-        db_table = 'settings'
+        table_name = 'settings'
 
 
 class Proposal(GovernanceClass, BaseModel):
-    governance_object = ForeignKeyField(GovernanceObject, related_name='proposals', on_delete='CASCADE', on_update='CASCADE')
+    governance_object = ForeignKeyField(GovernanceObject, backref='proposals', on_delete='CASCADE', on_update='CASCADE')
     name = CharField(default='', max_length=40)
     url = CharField(default='')
     start_epoch = IntegerField()
@@ -271,7 +275,7 @@ class Proposal(GovernanceClass, BaseModel):
     govobj_type = DASHD_GOVOBJ_TYPES['proposal']
 
     class Meta:
-        db_table = 'proposals'
+        table_name = 'proposals'
 
     def is_valid(self):
         import swamplib
@@ -321,7 +325,7 @@ class Proposal(GovernanceClass, BaseModel):
                 return False
 
         except Exception as e:
-            printdbg("Unable to validate in Proposal#is_valid, marking invalid: %s" % e.message)
+            printdbg("Unable to validate in Proposal#is_valid, marking invalid: %s" % e)
             return False
 
         printdbg("Leaving Proposal#is_valid, Valid = True")
@@ -428,11 +432,11 @@ class Proposal(GovernanceClass, BaseModel):
             print(manual_submit)
 
         except JSONRPCException as e:
-            print("Unable to prepare: %s" % e.message)
+            print("Unable to prepare: %s" % e)
 
 
 class Superblock(BaseModel, GovernanceClass):
-    governance_object = ForeignKeyField(GovernanceObject, related_name='superblocks', on_delete='CASCADE', on_update='CASCADE')
+    governance_object = ForeignKeyField(GovernanceObject, backref='superblocks', on_delete='CASCADE', on_update='CASCADE')
     event_block_height = IntegerField()
     payment_addresses = TextField()
     payment_amounts = TextField()
@@ -444,7 +448,7 @@ class Superblock(BaseModel, GovernanceClass):
     only_masternode_can_submit = True
 
     class Meta:
-        db_table = 'superblocks'
+        table_name = 'superblocks'
 
     def is_valid(self):
         import swamplib
@@ -570,7 +574,7 @@ class Signal(BaseModel):
     updated_at = DateTimeField(default=datetime.datetime.utcnow())
 
     class Meta:
-        db_table = 'signals'
+        table_name = 'signals'
 
 
 class Outcome(BaseModel):
@@ -579,24 +583,24 @@ class Outcome(BaseModel):
     updated_at = DateTimeField(default=datetime.datetime.utcnow())
 
     class Meta:
-        db_table = 'outcomes'
+        table_name = 'outcomes'
 
 
 class Vote(BaseModel):
-    governance_object = ForeignKeyField(GovernanceObject, related_name='votes', on_delete='CASCADE', on_update='CASCADE')
-    signal = ForeignKeyField(Signal, related_name='votes', on_delete='CASCADE', on_update='CASCADE')
-    outcome = ForeignKeyField(Outcome, related_name='votes', on_delete='CASCADE', on_update='CASCADE')
+    governance_object = ForeignKeyField(GovernanceObject, backref='votes', on_delete='CASCADE', on_update='CASCADE')
+    signal = ForeignKeyField(Signal, backref='signal_votes', on_delete='CASCADE', on_update='CASCADE')
+    outcome = ForeignKeyField(Outcome, backref='outcome_votes', on_delete='CASCADE', on_update='CASCADE')
     voted_at = DateTimeField(default=datetime.datetime.utcnow())
     created_at = DateTimeField(default=datetime.datetime.utcnow())
     updated_at = DateTimeField(default=datetime.datetime.utcnow())
     object_hash = CharField(max_length=64)
 
     class Meta:
-        db_table = 'votes'
+        table_name = 'votes'
 
 
 class Watchdog(BaseModel, GovernanceClass):
-    governance_object = ForeignKeyField(GovernanceObject, related_name='watchdogs')
+    governance_object = ForeignKeyField(GovernanceObject, backref='watchdogs')
     created_at = IntegerField()
     object_hash = CharField(max_length=64)
 
@@ -636,10 +640,10 @@ class Watchdog(BaseModel, GovernanceClass):
         return False
 
     class Meta:
-        db_table = 'watchdogs'
+        table_name = 'watchdogs'
 
 
-class Transient(object):
+class Transient:
 
     def __init__(self, **kwargs):
         for key in ['created_at', 'timeout', 'value']:
@@ -761,7 +765,7 @@ def check_db_sane():
     for model in db_models():
         if not getattr(model, 'table_exists')():
             missing_table_models.append(model)
-            printdbg("[warning]: table for %s (%s) doesn't exist in DB." % (model, model._meta.db_table))
+            printdbg("[warning]: table for %s (%s) doesn't exist in DB." % (model, model._meta.table_name))
 
     if missing_table_models:
         printdbg("[warning]: Missing database tables. Auto-creating tables.")
@@ -789,7 +793,7 @@ def check_db_schema_version():
         printdbg("[info]: Schema version mis-match. Syncing tables.")
         try:
             existing_table_names = db.get_tables()
-            existing_models = [m for m in db_models() if m._meta.db_table in existing_table_names]
+            existing_models = [m for m in db_models() if m._meta.table_name in existing_table_names]
             if (existing_models):
                 printdbg("[info]: Dropping tables...")
                 db.drop_tables(existing_models, safe=False, cascade=False)
