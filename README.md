@@ -1,4 +1,4 @@
-# Swamp Sentinel
+# Swamp Sentinel ------- Tested On Debian 12 -------
 
 An all-powerful toolset for Swamp.
 
@@ -12,14 +12,14 @@ This guide covers installing Sentinel onto an existing 1.1 Masternode in Ubuntu 
 
 ### 1. Install Prerequisites
 
-Make sure Python version 2.7.x or above is installed:
+Make sure Python version 3.12.x or above is installed:
 
     python --version
 
 Update system packages and ensure virtualenv is installed:
 
     $ sudo apt-get update
-    $ sudo apt-get -y install python-virtualenv
+    $ sudo apt-get -y install python3-venv
     $ sudo apt install virtualenv
 
 Make sure the local Swamp daemon running is at least version 1.1 (1010000)
@@ -30,7 +30,7 @@ Make sure the local Swamp daemon running is at least version 1.1 (1010000)
 
 Clone the Sentinel repo and install Python dependencies.
 
-    $ git clone https://github.com/swampcoin/sentinel.git && cd sentinel
+    $ git clone https://github.com/Cryptominer937/Sentinel-py3.git && cd Sentinel-py3
     $ virtualenv ./venv
     $ ./venv/bin/pip install -r requirements.txt
 
@@ -40,9 +40,9 @@ Set up a crontab entry to call Sentinel every minute:
 
     $ crontab -e
 
-In the crontab editor, add the lines below, replacing '~/sentinel' to the path where you cloned sentinel to:
+In the crontab editor, add the lines below, replacing '~/Sentinel-py3' to the path where you cloned sentinel to:
 
-    * * * * * cd ~/sentinel && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1
+    * * * * * cd ~/Sentinel-py3 && ./venv/bin/python bin/sentinel.py >/dev/null 2>&1
 
 ### 4. Test the Configuration
 
