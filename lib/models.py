@@ -255,8 +255,8 @@ class GovernanceObject(BaseModel):
 class Setting(BaseModel):
     name = CharField(default='')
     value = CharField(default='')
-    created_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
-    updated_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
+    created_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
+    updated_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
 
     class Meta:
         table_name = 'settings'
@@ -570,8 +570,8 @@ def on_save_handler(model_class, instance, created):
 
 class Signal(BaseModel):
     name = CharField(unique=True)
-    created_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
-    updated_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
+    created_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
+    updated_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
 
     class Meta:
         table_name = 'signals'
@@ -579,8 +579,8 @@ class Signal(BaseModel):
 
 class Outcome(BaseModel):
     name = CharField(unique=True)
-    created_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
-    updated_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
+    created_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
+    updated_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
 
     class Meta:
         table_name = 'outcomes'
@@ -590,9 +590,9 @@ class Vote(BaseModel):
     governance_object = ForeignKeyField(GovernanceObject, backref='votes', on_delete='CASCADE', on_update='CASCADE')
     signal = ForeignKeyField(Signal, backref='signal_votes', on_delete='CASCADE', on_update='CASCADE')
     outcome = ForeignKeyField(Outcome, backref='outcome_votes', on_delete='CASCADE', on_update='CASCADE')
-    voted_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
-    created_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
-    updated_at = DateTimeField(default=datetime.datetime.now(datetime.timezone.utc))
+    voted_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
+    created_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
+    updated_at = DateTimeField(default=lambda: datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None))
     object_hash = CharField(max_length=64)
 
     class Meta:
@@ -671,7 +671,7 @@ class Transient:
     @classmethod
     def from_setting(self, setting):
         dikt = Transient.deserialise(setting.value)
-        dikt['created_at'] = int((setting.created_at - datetime.datetime.fromtimestamp(0, datetime.timezone.utc)).total_seconds())
+        dikt['created_at'] = int((setting.created_at - datetime.datetime(1970, 1, 1)).total_seconds())
         return Transient(**dikt)
 
     @classmethod
