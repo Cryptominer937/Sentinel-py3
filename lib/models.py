@@ -671,7 +671,7 @@ class Transient:
     @classmethod
     def from_setting(self, setting):
         dikt = Transient.deserialise(setting.value)
-        dikt['created_at'] = int((setting.created_at - datetime.datetime.utcfromtimestamp(0)).total_seconds())
+        dikt['created_at'] = int((setting.created_at - datetime.datetime.fromtimestamp(0, datetime.timezone.utc)).total_seconds())
         return Transient(**dikt)
 
     @classmethod

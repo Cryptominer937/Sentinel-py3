@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 
 def is_valid_python_version():
     ver = sys.version_info
-    return (ver.major == 3) and (ver.minor >= 12)
+    return (ver.major == 3) and (ver.minor >= 11)
 
 
 def python_short_ver_str():
