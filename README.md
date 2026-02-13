@@ -18,27 +18,27 @@ Make sure Python version 3.11.x or above is installed:
 
 Update system packages and ensure virtualenv is installed:
 
-    $ sudo apt-get update
-    $ sudo apt-get -y install python3-venv git
-    $ sudo apt install virtualenv
+    sudo apt-get update
+    sudo apt-get -y install python3-venv git
+    sudo apt install virtualenv
 
 Make sure the local Swamp daemon running is at least version 2 (2000003)
 
-    $ swamp-cli getinfo | grep version
+    swamp-cli getinfo | grep version
 
 ### 2. Install Sentinel
 
 Clone the Sentinel repo and install Python dependencies.
 
-    $ git clone https://github.com/Cryptominer937/Sentinel-py3.git && cd Sentinel-py3
-    $ virtualenv ./venv
-    $ ./venv/bin/pip install -r requirements.txt
+    git clone https://github.com/Cryptominer937/Sentinel-py3.git && cd Sentinel-py3
+    virtualenv ./venv
+    ./venv/bin/pip install -r requirements.txt
 
 ### 3. Set up Cron
 
 Set up a crontab entry to call Sentinel every minute:
 
-    $ crontab -e
+    crontab -e
 
 In the crontab editor, add the lines below, replacing '~/Sentinel-py3' to the path where you cloned sentinel to:
 
@@ -48,7 +48,7 @@ In the crontab editor, add the lines below, replacing '~/Sentinel-py3' to the pa
 
 Test the config by runnings all tests from the sentinel folder you cloned into
 
-    $ ./venv/bin/py.test ./test
+    ./venv/bin/py.test ./test
 
 With all tests passing and crontab setup, Sentinel will stay in sync with swampd and the installation is complete
 
@@ -62,10 +62,4 @@ An alternative (non-default) path to the `swamp.conf` file can be specified in `
 
 To view debug output, set the `SENTINEL_DEBUG` environment variable to anything non-zero, then run the script manually:
 
-    $ SENTINEL_DEBUG=1 ./venv/bin/python bin/sentinel.py
-
-
-
-### License
-
-Released under the MIT license, under the same terms as SwampCore itself. See [LICENSE](LICENSE) for more info.
+    SENTINEL_DEBUG=1 ./venv/bin/python bin/sentinel.py
